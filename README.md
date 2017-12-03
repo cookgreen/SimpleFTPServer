@@ -8,4 +8,4 @@ Python 2.7.x
 Wxpython 3.0 (optional) 
 
 ## License
-MIT
+GPL v3.0
