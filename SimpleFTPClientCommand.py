@@ -2,20 +2,26 @@ from abc import ABCMeta,abstractmethod
 
 class SimpleFTPClientCommand(object):
 	__metaclass__ = ABCMeta
-	def __init__(self, ftpClient):
+	def __init__(self, ftpClient, **kwargs):
 		self.ftpClient = ftpClient
 
 	@abstractmethod
+        def Init(self, *args):
+                pass
+	
 	def GetCommandName(self):
 		pass
 
 	def GetCommandDescription(self):
 		pass
 
-	def Execute(self, **kwargs):
+	def Execute(self, *args):
 		pass
 
 class SimpleFTPClientCommandHelp(SimpleFTPClientCommand):
+        def Init(self, *args):
+                return True
+        
 	def GetCommandName(self):
 		return "help"
 
@@ -28,6 +34,9 @@ class SimpleFTPClientCommandHelp(SimpleFTPClientCommand):
 			print "%s - %s" % (key, commands[key].GetCommandDescription())
 
 class SimpleFTPClientCommandQuit(SimpleFTPClientCommand):
+        def Init(self, *args):
+                return True
+        
 	def GetCommandName(self):
 		return "quit"
 
@@ -38,6 +47,9 @@ class SimpleFTPClientCommandQuit(SimpleFTPClientCommand):
 		self.ftpClient.exit()
 
 class SimpleFTPClientCommandVersion(SimpleFTPClientCommand):
+        def Init(self, *args):
+                return True
+        
 	def GetCommandName(self):
 		return "version"
 
@@ -48,6 +60,10 @@ class SimpleFTPClientCommandVersion(SimpleFTPClientCommand):
 		print self.ftpClient.version
 
 class SimpleFTPClientCommandConnect(SimpleFTPClientCommand):
+        def Init(self, *args):
+                self.clientSock = args[0]
+                return True
+        
 	def GetCommandName(self):
 		return "connect"
 
@@ -57,7 +73,7 @@ class SimpleFTPClientCommandConnect(SimpleFTPClientCommand):
 	def Execute(self, **kwargs):
 		try:
 			self.clientSock.connect(("localhost",21))
-			self.connected = True
+			self.ftpClient.connect()
 		except:
 			print "connection failed! server maybe unreachable"
 

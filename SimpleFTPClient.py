@@ -6,11 +6,13 @@ class SimpleFTPClient(object):
 		self.connected = False
 		self.clientSock = socket(AF_INET, SOCK_STREAM)
 		self.version = "0.0.1"
+		connectCmd = SimpleFTPClientCommandConnect(self)
+		connectCmd.Init(self.clientSock)
 		self.avaliableCommands = {
 				"help":SimpleFTPClientCommandHelp(self),
 				"quit":SimpleFTPClientCommandQuit(self),
 				"version":SimpleFTPClientCommandVersion(self),
-				"connect":SimpleFTPClientCommandConnect(self)
+				"connect":connectCmd
 			}
 		self.quit = False
 
@@ -32,7 +34,11 @@ class SimpleFTPClient(object):
 				ret = self.clientSock.recv(1024)
 				for r in ret.split(':'):
 					print r
+	def connect(self):
+		self.connected = True
+		
 	def exit(self):
+		self.connected = False
 		self.quit = True
 		
 if __name__ == '__main__':

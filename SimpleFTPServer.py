@@ -1,6 +1,8 @@
 import os
+import sys
 from socket import *
 from threading import *
+from SimpleFTPServerCommand import *
 
 wxFound = False
 try:
@@ -8,7 +10,6 @@ try:
 	wxFound = True
 except ImportError as e:
 	wxFound = False
-wxFound = False
 
 class SimpleFTPServerConfigDlg(wx.Dialog):
 	def __init__(self):
@@ -81,13 +82,18 @@ class SimpleFTPServer(object):
 		self.s.bind((self.host, self.port))
 		self.s.listen(5)
 		self.stopped = False
+		self.avaliableCommands = {
+			"ls":SimpleFTPServerCommandListDir(self),
+			"cd":SimpleFTPServerCommandChangeDir(self),
+			"cwd":SimpleFTPServerCommandGetCurrentWorkDirectory(self)
+		}
 
 	def Start(self):
 		print "Server started on %s:%s" % (self.host, self.port)
 		while True:
 			if(self.stopped):
 				break
-			self.client = SimpleFTPClientThread(self.s.accept())
+			self.client = SimpleFTPClientThread(self.s.accept(),self.avaliableCommands)
 			self.client.start()
 			self.clients.append(self.client)
 		self.server.close()
@@ -113,30 +119,20 @@ class SimpleFTPServerThread(Thread):
 		s.Start()
 
 class SimpleFTPClientThread(Thread):
-	def __init__(self, sockettuple):
+	def __init__(self, sockettuple, commands):
 		Thread.__init__(self)
 		self.clientSock, addr = sockettuple
 		print "client from " + addr[0] + " connected"
 		self.stopped = False
+		self.commands = commands
 
 	def run(self):
 		while True:
 			if(self.stopped):
 				break
 			self.data = self.clientSock.recv(1024)
-			if(self.data == "ls"):
-				ret = ""
-				filelst = os.listdir(os.getcwd())
-				lstnum = len(filelst)
-				idx = 0
-				for f in filelst:
-					if(idx != lstnum - 1):
-						ret = ret + f+":"
-					else:
-						ret = ret + f
-					idx = idx + 1
-				print ret
-				self.clientSock.send(ret)
+			if(self.data in self.commands):
+				self.clientSock.send(self.commands[self.data].Execute())
 			else:
 				self.clientSock.send("command not found")
 		self.clientSock.close()
@@ -149,8 +145,8 @@ if __name__ == '__main__':
 		app = SimpleFTPServerConfigApp()
 		app.MainLoop()
 	else:
-                if(len(sys.argv) > 1 and len(sys.argv[1:]) >= 2 and len(sys.argv[1:] <= 4)):
-                        if(len(sys.argv[1:]) == 2):
+		if(len(sys.argv) > 1 and len(sys.argv[1:]) >= 2 and len(sys.argv[1:] <= 4)):
+			if(len(sys.argv[1:]) == 2):
 				server = SimpleFTPServerThread(sys.argv[1:][0],int(sys.argv[1:][1]))
 				server.start()
 			else:
