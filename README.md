@@ -1,4 +1,5 @@
 # SimpleFTPServer
+![License](https://img.shields.io/badge/License-GPL-blue.svg)  
 
 ## Introduction
 Simple FTP Server written with python
