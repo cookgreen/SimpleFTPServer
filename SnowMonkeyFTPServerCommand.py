@@ -30,7 +30,7 @@ class SimpleFTPServerCommandListDir(SimpleFTPServerCommand):
 		idx = 0
 		for f in filelst:
 			if(idx != lstnum - 1):
-				ret = ret + f+":"
+				ret = ret + f+"|"
 			else:
 				ret = ret + f
 			idx = idx + 1

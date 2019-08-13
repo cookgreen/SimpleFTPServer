@@ -1,6 +1,6 @@
 from abc import ABCMeta,abstractmethod
 
-class SimpleFTPClientCommand(object):
+class SnowMonkeyFTPClientCommand(object):
 	__metaclass__ = ABCMeta
 	def __init__(self, ftpClient, **kwargs):
 		self.ftpClient = ftpClient
@@ -18,7 +18,7 @@ class SimpleFTPClientCommand(object):
 	def Execute(self, *args):
 		pass
 
-class SimpleFTPClientCommandHelp(SimpleFTPClientCommand):
+class SnowMonkeyFTPClientCommandHelp(SnowMonkeyFTPClientCommand):
         def Init(self, *args):
                 return True
         
@@ -28,12 +28,12 @@ class SimpleFTPClientCommandHelp(SimpleFTPClientCommand):
 	def GetCommandDescription(self):
 		return "Show help"
 
-	def Execute(self, **kwargs):
+	def Execute(self, *args):
 		commands = self.ftpClient.avaliableCommands
 		for key in commands:
 			print "%s - %s" % (key, commands[key].GetCommandDescription())
 
-class SimpleFTPClientCommandQuit(SimpleFTPClientCommand):
+class SnowMonkeyFTPClientCommandQuit(SnowMonkeyFTPClientCommand):
         def Init(self, *args):
                 return True
         
@@ -43,10 +43,10 @@ class SimpleFTPClientCommandQuit(SimpleFTPClientCommand):
 	def GetCommandDescription(self):
 		return "Exit application"
 
-	def Execute(self, **kwargs):
+	def Execute(self, *args):
 		self.ftpClient.exit()
 
-class SimpleFTPClientCommandVersion(SimpleFTPClientCommand):
+class SnowMonkeyFTPClientCommandVersion(SnowMonkeyFTPClientCommand):
         def Init(self, *args):
                 return True
         
@@ -56,10 +56,10 @@ class SimpleFTPClientCommandVersion(SimpleFTPClientCommand):
 	def GetCommandDescription(self):
 		return "Show version"
 
-	def Execute(self, **kwargs):
+	def Execute(self, *args):
 		print self.ftpClient.version
 
-class SimpleFTPClientCommandConnect(SimpleFTPClientCommand):
+class SnowMonkeyFTPClientCommandConnect(SnowMonkeyFTPClientCommand):
         def Init(self, *args):
                 self.clientSock = args[0]
                 return True
@@ -70,10 +70,26 @@ class SimpleFTPClientCommandConnect(SimpleFTPClientCommand):
 	def GetCommandDescription(self):
 		return "connect <host> <port> [username] [password] connect to specific server"
 
-	def Execute(self, **kwargs):
+	def Execute(self, *args):
 		try:
-			self.clientSock.connect(("localhost",21))
+			serverPortTokens = args[0]
+			self.clientSock.connect((serverPortTokens[0], int(serverPortTokens[1])))
 			self.ftpClient.connect()
-		except:
+		except Exception, err:
 			print "connection failed! server maybe unreachable"
+			print err
 
+class SnowMonkeyFTPClientCommandShowServerCommands(SnowMonkeyFTPClientCommand):
+		
+        def Init(self, *args):
+			self.clientSock = args[0]
+			return True
+        
+	def GetCommandName(self):
+		return "show_srv_cmd"
+
+	def GetCommandDescription(self):
+		return "Show avaliable server commands"
+
+	def Execute(self, *args):
+		self.clientSock.send("show_srv_cmd")
