@@ -1,4 +1,4 @@
-# SimpleFTPServer
+# SnowMonkeyFTPServer
 ![License](https://img.shields.io/badge/License-GPL-blue.svg)  
 
 ## Introduction
