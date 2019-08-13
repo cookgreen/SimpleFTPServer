@@ -13,11 +13,14 @@ class SnowMonkeyFTPClientRecvThread(Thread):
 				break
 			
 			if(self.client.connected):
-				ret = self.client.clientSock.recv(1024)
-				print
-				for r in ret.split('|'):
-					print r
-
+				try:
+					ret = self.client.clientSock.recv(1024)
+					print
+					for r in ret.split('|'):
+						print r
+				except:
+					break
+					
 class SnowMonkeyFTPClient(object):
 	def __init__(self):
 		self.connected = False
@@ -39,6 +42,7 @@ class SnowMonkeyFTPClient(object):
 	def run(self):
 		print """SnowMonkeyFTPClient Version %s \ntype 'help' show help """ % self.version
 		self.recvThread = SnowMonkeyFTPClientRecvThread(self)
+		self.recvThread.setDaemon(True)
 		self.recvThread.start();
 		while True:
 			if(self.quit):
@@ -55,15 +59,21 @@ class SnowMonkeyFTPClient(object):
 			if(tokens[0] in self.avaliableCommands):
 				self.avaliableCommands[tokens[0]].Execute(args)
 			elif(self.connected):
-				self.clientSock.send(tokens[0])
+				try:
+					self.clientSock.send(data)
+				except:
+					break
 			else:
 				print "Command not found"
+
 	def connect(self):
 		self.connected = True
 		
 	def exit(self):
-		self.connected = False
 		self.quit = True
+		self.connected = False
+		self.clientSock.close()
+		
 		
 if __name__ == '__main__':
 	app = SnowMonkeyFTPClient()

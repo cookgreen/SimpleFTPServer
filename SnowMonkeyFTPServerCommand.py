@@ -1,7 +1,7 @@
 import os
 from abc import ABCMeta,abstractmethod
 
-class SimpleFTPServerCommand(object):
+class SnowMonkeyFTPServerCommand(object):
 	__metaclass__ = ABCMeta
 	def __init__(self, ftpServer):
 		self.ftpServer = ftpServer
@@ -13,17 +13,17 @@ class SimpleFTPServerCommand(object):
 	def GetCommandDescription(self):
 		pass
 
-	def Execute(self, **kwargs):
+	def Execute(self, *args):
 		pass
 
-class SimpleFTPServerCommandListDir(SimpleFTPServerCommand):
+class SnowMonkeyFTPServerCommandListDir(SnowMonkeyFTPServerCommand):
 	def GetCommandName(self):
 		return "ls"
 
 	def GetCommandDescription(self):
 		return "list the current server work directory"
 
-	def Execute(self, **kwargs):
+	def Execute(self, *args):
 		ret = ""
 		filelst = os.listdir(os.getcwd())
 		lstnum = len(filelst)
@@ -36,23 +36,33 @@ class SimpleFTPServerCommandListDir(SimpleFTPServerCommand):
 			idx = idx + 1
 		return ret
 
-class SimpleFTPServerCommandChangeDir(SimpleFTPServerCommand):
+class SnowMonkeyFTPServerCommandChangeDir(SnowMonkeyFTPServerCommand):
 	def GetCommandName(self):
 		return "cd"
 
 	def GetCommandDescription(self):
 		return "change current work directory to another directory"
 
-	def Execute(self, **kwargs):
+	def Execute(self, *args):
 		return os.chdir(os.getcwd())
 
-class SimpleFTPServerCommandGetCurrentWorkDirectory(SimpleFTPServerCommand):
+class SnowMonkeyFTPServerCommandGetCurrentWorkDirectory(SnowMonkeyFTPServerCommand):
 	def GetCommandName(self):
 		return "cwd"
 
 	def GetCommandDescription(self):
 		return "Get current work directory"
 
-	def Execute(self, **kwargs):
+	def Execute(self, *args):
 		return os.getcwd()
 		
+class SnowMonkeyFTPServerCommandEcho(SnowMonkeyFTPServerCommand):
+	def GetCommandName(self):
+		return "echo"
+
+	def GetCommandDescription(self):
+		return "Echo message"
+
+	def Execute(self, *args):
+		print args
+		return "Echo from server: " + args[0][0]

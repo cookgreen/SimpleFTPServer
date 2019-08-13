@@ -34,20 +34,26 @@ class SnowMonkeyFTPClientThread(Thread):
 		while True:
 			if(self.stopped):
 				break
-			self.data = self.clientSock.recv(1024)
-			if(self.data in self.commands):
-				self.clientSock.send(self.commands[self.data].Execute())
-			elif(self.data=="show_srv_cmd"):
-				str = ""
-				index = 0
-				for cmd in self.commands:
-					str += cmd
-					if(index!=len(self.commands)-1):
-						str += "|"
-					index = index + 1
-				self.clientSock.send(str)
-			else:
-				self.clientSock.send("command not found")
+			try:
+				self.data = self.clientSock.recv(1024)
+				tokens = self.data.split(' ')
+				args = tokens[1:len(tokens)]
+				
+				if(tokens[0] in self.commands):
+					self.clientSock.send(self.commands[tokens[0]].Execute(args))
+				elif(self.data=="show_srv_cmd"):
+					str = ""
+					index = 0
+					for cmd in self.commands:
+						str += cmd
+						if(index!=len(self.commands)-1):
+							str += "|"
+						index = index + 1
+					self.clientSock.send(str)
+				else:
+					self.clientSock.send("command not found")
+			except:
+				break
 		self.clientSock.close()
 
 	def close(self):
@@ -126,9 +132,10 @@ class SnowMonkeyFTPServer(object):
 		self.s.listen(5)
 		self.stopped = False
 		self.avaliableCommands = {
-			"ls":SimpleFTPServerCommandListDir(self),
-			"cd":SimpleFTPServerCommandChangeDir(self),
-			"cwd":SimpleFTPServerCommandGetCurrentWorkDirectory(self)
+			"ls":SnowMonkeyFTPServerCommandListDir(self),
+			"cd":SnowMonkeyFTPServerCommandChangeDir(self),
+			"cwd":SnowMonkeyFTPServerCommandGetCurrentWorkDirectory(self),
+			"echo":SnowMonkeyFTPServerCommandEcho(self),
 		}
 
 	def Start(self):
